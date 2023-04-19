@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
+using PlayBoardGames.Users;
+
 namespace PlayBoardGames
 {
 	public class Program
@@ -8,16 +7,8 @@ namespace PlayBoardGames
 		public static void Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
-
-			// Add services to the container.
-			builder.Services
-				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-				.AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-			builder.Services.AddControllers();
-			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-			builder.Services.AddEndpointsApiExplorer();
-			builder.Services.AddSwaggerGen();
+			
+			SetupServices(builder.Services);
 
 			var app = builder.Build();
 
@@ -34,6 +25,18 @@ namespace PlayBoardGames
 
 			app.MapControllers();
 			app.Run();
+		}
+
+		protected static void SetupServices(IServiceCollection services)
+		{
+			services.AddSingleton<IUserRepository>(new RAMUserRepository());
+
+			Auth.AuthOptions.SetupAuthentication(services);
+
+			services.AddControllers();
+			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+			services.AddEndpointsApiExplorer();
+			services.AddSwaggerGen();
 		}
 	}
 }
