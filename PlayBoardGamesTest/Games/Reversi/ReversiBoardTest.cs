@@ -22,7 +22,10 @@ namespace PlayBoardGamesTest.Games.Reversi
 		[TestMethod]
 		public void ShouldTestOpportunitiesToMoveAccordinglyToRules()
 		{
-			(BoardCreator creator, (int x, int y)[] validMoves)[] samples =
+			(
+				BoardCreator creator,
+				(int x, int y)[] validMoves
+			)[] samples =
 			{
 				(new(), new[]{ (2, 3), (3, 2), (4, 5), (5, 4) })
 			};

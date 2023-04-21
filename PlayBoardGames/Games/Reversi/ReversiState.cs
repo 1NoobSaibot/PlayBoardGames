@@ -1,9 +1,10 @@
 ﻿namespace PlayBoardGames.Games.Reversi
 {
-	public class ReversiState
+	public class ReversiState : IReversiState
 	{
 		private readonly ReversiCell[,] _cells;
-		public readonly ReversiCell CurrentSide;
+		private readonly ReversiCell _currentSide;
+		public ReversiCell CurrentSide => _currentSide;
 
 		public ReversiState(ReversiCell[,] cells, ReversiCell currentSide)
 		{
@@ -14,7 +15,7 @@
 
 			_cells = new ReversiCell[8, 8];
 			Array.Copy(cells, _cells, 64);
-			CurrentSide = currentSide;
+			_currentSide = currentSide;
 		}
 
 
@@ -63,13 +64,5 @@
 
 
 		public ReversiCell this[int x, int y] => _cells[x, y];
-	}
-
-
-	public enum ReversiCell
-	{
-		Empty = 0,
-		White = 1,
-		Black = 2
 	}
 }

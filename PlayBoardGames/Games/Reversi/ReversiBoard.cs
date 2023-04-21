@@ -1,6 +1,6 @@
 ﻿namespace PlayBoardGames.Games.Reversi
 {
-	public class ReversiBoard : Board<ReversiState, ReversiMove>
+	public class ReversiBoard : Board<ReversiState, ReversiMove>, IReversiState
 	{
 		private readonly ReversiCell[,] _cells = new ReversiCell[8, 8];
 		public ReversiCell CurrentSide { get; private set; } = ReversiCell.Black;
@@ -35,12 +35,13 @@
 
 		public override bool CanMove(ReversiMove args)
 		{
-			return CanSideMove(args, CurrentSide);
+			return ReversiRules.CanMove(this, args);
 		}
 
 
 		public override ReversiState GetState()
 		{
+			// Don't return board(this) as a state, because it's mutable
 			return new ReversiState(_cells, CurrentSide);
 		}
 
@@ -67,37 +68,29 @@
 		}
 
 
-		private static ReversiCell Invert(ReversiCell cell)
-		{
-			if (cell == ReversiCell.White)
-			{
-				return ReversiCell.Black;
-			}
-				
-			if (cell == ReversiCell.Black)
-			{
-				return ReversiCell.White;
-			}
-				
-			throw new Exception("Inverting an Empty-Cell detected. It is probably logic error");
-		}
-
-
 		private void _checkWhoIsNext ()
 		{
-			var oppositeSide = Invert(CurrentSide);
-			if (this.IsThereMoveForSide(oppositeSide))
+			CurrentSide = ReversiRules.InvertCell(CurrentSide);
+			if (ReversiRules.IsItPossibleToMove(this))
 			{
-				CurrentSide = oppositeSide;
+				// If we have a move for next player
+				return;
 			}
-			else if (!this.IsThereMoveForSide(CurrentSide))
+
+			// We don't have a move for next player
+			CurrentSide = ReversiRules.InvertCell(CurrentSide);
+			if (ReversiRules.IsItPossibleToMove(this))
 			{
-				CurrentSide = ReversiCell.Empty;
+				// If we have a move for previous player
+				return;
 			}
+
+			// We have no moves for Black and White sides. Game is over
+			CurrentSide = ReversiCell.Empty;
 		}
 
 
-		private static readonly ReversiMove[] DIRECTIONS = {
+		private static readonly IReadOnlyList<ReversiMove> DIRECTIONS = new ReversiMove[]{
 			new( 0,  1),
 			new( 1,  1),
 			new( 1,  0),
@@ -113,78 +106,13 @@
 		{
 			_cells[position.X, position.Y] = CurrentSide;
 
-			for (int i = 0; i < DIRECTIONS.Length; i++)
+			for (int i = 0; i < DIRECTIONS.Count; i++)
 			{
-				if (IsLineValid(position, DIRECTIONS[i], CurrentSide))
+				if (ReversiRules.IsLineValid(this, position, DIRECTIONS[i], CurrentSide))
 				{
 					InvertLine(position, DIRECTIONS[i]);
 				}
 			}
-		}
-
-
-		private bool IsThereMoveForSide(ReversiCell side)
-		{
-			for (int x = 0; x < 8; x++)
-			{
-				for (int y = 0; y < 8; y++)
-				{
-					var position = new ReversiMove(x, y);
-					if (CanSideMove(position, side))
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-
-
-		private bool CanSideMove(ReversiMove position, ReversiCell side)
-		{
-			int x = position.X;
-			int y = position.Y;
-			if (_cells[x, y] != ReversiCell.Empty)
-			{
-				return false;
-			}
-
-			for (int i = 0; i < DIRECTIONS.Length; i++)
-			{
-				if (IsLineValid(position, DIRECTIONS[i], side))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-
-		private bool IsLineValid(ReversiMove position, ReversiMove direction, ReversiCell side)
-		{
-			var oppositeSide = Invert(side);
-
-			bool isEnemyBetweenUs = false;
-			position = new(position.X + direction.X, position.Y + direction.Y);
-			while (
-				IsPointInsideBoard(position)
-				&& this.GetCell(position) != ReversiCell.Empty
-			)
-			{
-				if (this.GetCell(position) == side)
-				{
-					return isEnemyBetweenUs;
-				}
-				if (GetCell(position) == oppositeSide)
-				{
-					isEnemyBetweenUs = true;
-				}
-				position = new(position.X + direction.X, position.Y + direction.Y);
-			}
-
-			return false;
 		}
 
 
@@ -193,19 +121,9 @@
 			ReversiMove cell = new(position.X + direction.X, position.Y + direction.Y);
 			do
 			{
-				_cells[cell.X, cell.Y] = Invert(_cells[cell.X, cell.Y]);
+				_cells[cell.X, cell.Y] = ReversiRules.InvertCell(_cells[cell.X, cell.Y]);
 				cell = new(cell.X + direction.X, cell.Y + direction.Y);
 			} while (_cells[cell.X, cell.Y] != CurrentSide);
-		}
-
-
-		private bool IsPointInsideBoard(ReversiMove point)
-		{
-			return
-				point.X >= 0
-				&& point.Y >= 0
-				&& point.X <= 7
-				&& point.Y <= 7;
 		}
 	}
 }
