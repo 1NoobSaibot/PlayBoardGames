@@ -5,6 +5,6 @@
 		bool CanMove(TMove move);
 		TState GetState();
 		bool IsGameOver { get; }
-		bool Move(TMove move);
+		bool TryMove(TMove move);
 	}
 }

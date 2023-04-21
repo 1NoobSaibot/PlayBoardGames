@@ -2,32 +2,37 @@
 {
 	public abstract class Board<TState, TMove> : IBoard<TState, TMove>
 	{
-		private bool _isGameOver = false;
-		public bool IsGameOver => _isGameOver;
+		public bool IsGameOver { get; private set; } = false;
 		public abstract TState GetState();
 		public abstract bool CanMove(TMove moveArgs);
 
-		public bool Move(TMove moveArgs) {
-			if (_isGameOver) {
+
+		public bool TryMove(TMove moveArgs) {
+			if (IsGameOver)
+			{
 				throw new Exception("Moving after the game is over");
 			}
-			if (!CanMove(moveArgs)) {
+			if (!CanMove(moveArgs))
+			{
 				return false;
 			}
 
-			_Move(moveArgs);
-			if (_CheckIsGameOver()) {
-				_setGameOver();
+			Move(moveArgs);
+			if (CheckIsGameOver())
+			{
+				SetGameOver();
 			}
 			return true;
 		}
 
-		protected abstract void _Move(TMove moveArgs);
-		protected abstract bool _CheckIsGameOver();
 
-		private void _setGameOver()
+		protected abstract void Move(TMove moveArgs);
+		protected abstract bool CheckIsGameOver();
+
+
+		private void SetGameOver()
 		{
-			_isGameOver = true;
+			IsGameOver = true;
 		}
 	}
 }

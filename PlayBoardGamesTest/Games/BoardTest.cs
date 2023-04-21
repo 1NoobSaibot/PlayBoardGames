@@ -12,19 +12,21 @@ namespace PlayBoardGamesTest.Games
 			Assert.AreEqual(false, board.IsGameOver);
 		}
 
+
 		[TestMethod]
 		public void ShouldLetToMakeValidMove()
 		{
 			var board = new DummyBoard();
-			Assert.AreEqual(true, board.Move(DummyMove.Play));
-			Assert.AreEqual(true, board.Move(DummyMove.FinishGame));
+			Assert.AreEqual(true, board.TryMove(DummyMove.Play));
+			Assert.AreEqual(true, board.TryMove(DummyMove.FinishGame));
 		}
+
 
 		[TestMethod]
 		public void ShouldNotLetToMakeWrongMove()
 		{
 			var board = new DummyBoard();
-			Assert.AreEqual(false, board.Move(DummyMove.WrongMove));
+			Assert.AreEqual(false, board.TryMove(DummyMove.WrongMove));
 		}
 
 
@@ -32,7 +34,7 @@ namespace PlayBoardGamesTest.Games
 		public void ShouldChangeIsGameOverFlagWhenPlayerFinishGame()
 		{
 			var board = new DummyBoard();
-			board.Move(DummyMove.FinishGame);
+			board.TryMove(DummyMove.FinishGame);
 			Assert.AreEqual(true, board.IsGameOver);
 		}
 
@@ -41,7 +43,7 @@ namespace PlayBoardGamesTest.Games
 		public void ShouldNotChangeIsGameOverFlagWhenPlayerDoesntFinishGame()
 		{
 			var board = new DummyBoard();
-			board.Move(DummyMove.Play);
+			board.TryMove(DummyMove.Play);
 			Assert.AreEqual(false, board.IsGameOver);
 		}
 
@@ -50,8 +52,8 @@ namespace PlayBoardGamesTest.Games
 		public void ShouldThrowAnErrorWhenYouTryToMoveAfterFinishingGame()
 		{
 			var board = new DummyBoard();
-			board.Move(DummyMove.FinishGame);
-			Assert.ThrowsException<Exception>(() => board.Move(DummyMove.Play));
+			board.TryMove(DummyMove.FinishGame);
+			Assert.ThrowsException<Exception>(() => board.TryMove(DummyMove.Play));
 		}
 	}
 
@@ -74,16 +76,17 @@ namespace PlayBoardGamesTest.Games
 			return DummyState.Victory;
 		}
 
-		protected override bool _CheckIsGameOver()
+		protected override bool CheckIsGameOver()
 		{
 			return _lastMove == DummyMove.FinishGame;
 		}
 
-		protected override void _Move(DummyMove moveArgs)
+		protected override void Move(DummyMove moveArgs)
 		{
 			_lastMove = moveArgs;
 		}
 	}
+
 
 	file enum DummyMove
 	{
@@ -91,6 +94,7 @@ namespace PlayBoardGamesTest.Games
 		Play,
 		FinishGame
 	}
+
 
 	file enum DummyState
 	{
